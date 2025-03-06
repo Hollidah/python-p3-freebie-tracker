@@ -33,7 +33,6 @@ dev2.received_one(freebie3)
 session.commit()
 
 
-
 print(freebie1.print_details())
 print(dev1.received_one("Mug"))
 print(dev3.received_one("Note Book"))
