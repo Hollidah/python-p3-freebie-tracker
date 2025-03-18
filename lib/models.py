@@ -16,6 +16,11 @@ class Company(Base):
     name = Column(String())
     founding_year = Column(Integer())
 
+
+    # Relationship between freebies and comapny
+    freebies = relationship('Freebie', back_populates='company')
+
+
     def __repr__(self):
         return f'<Company {self.name}>'
 
