@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 
-from models import Company, Dev, Freebie
+from models import Base, Company, Dev, Freebie
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+
+
+# Databse set-up
+engine = create_engine("sqlite:///freebies.db")
+Base.metadata.create_all(engine)     # creating database tables
+
+# create a session
+Session = sessionmaker(bind=engine)
+session = Session()
+
 
 # Clear existing data
 session.query(Freebie).delete()
@@ -26,35 +36,43 @@ freebie1 = Freebie(item_name="Water Bottle", value=100, dev=dev1, company=compan
 freebie2 = Freebie(item_name="Note Book", value=50, dev=dev2, company=company3)
 freebie3 = Freebie(item_name="Mug", value=20, dev=dev3, company=company2)
 
-sesssion.add_all([company1, company2, company3, dev1, dev2, dev3, freebie1, freebie2, freebie3])
+session.add_all([company1, company2, company3, dev1, dev2, dev3, freebie1, freebie2, freebie3])
 session.commit()
 
+
+# check if devs received freebies
 dev1.received_one(freebie1)
-dev2.received_one(frebbie1)
+dev2.received_one(freebie1)
 dev3.received_one(freebie2)
 dev2.received_one(freebie3)
 
 session.commit()
-
-
 print(freebie1.print_details())
+
+
+# freebies received by devs
 print(dev1.received_one("Mug"))
 print(dev3.received_one("Note Book"))
 
+
+# transfer ownership of freebie
 dev1.give_away(dev2, freebie1)
 session.commit()
 
+# print details after transfer
 print(freebie1.print_details())
+
+# find oldest comapny
 print(Company.oldest_company(session).name)
 
 # print all companies
 print("Companies:")
-for commpany in session.query(Company).all():
+for company in session.query(Company).all():
     print(f"- {company.name} (Founded: {company.founding_year})")
 
  
- # print all devs
-print("\nFreebies:")
+ # print all freebies
+print("Freebies:")
 for commpany in session.query(Freebie).all():
     print(f"- {freebie.print_details()}")  
 
