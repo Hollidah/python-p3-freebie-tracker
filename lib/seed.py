@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 
-# Databse set-up
+# Database set-up
 engine = create_engine("sqlite:///freebies.db")
 Base.metadata.create_all(engine)     # creating database tables
 
@@ -39,15 +39,22 @@ freebie3 = Freebie(item_name="Mug", value=20, dev=dev3, company=company2)
 session.add_all([company1, company2, company3, dev1, dev2, dev3, freebie1, freebie2, freebie3])
 session.commit()
 
+# Test Freebie relationship
+print("Testing Freebie relationships:")
+print(f"Freebie1 dev: {freebie1.dev.name}")
+print(f"Freebie1 company: {freebie1.company.name}")
 
-# check if devs received freebies
-dev1.received_one(freebie1)
-dev2.received_one(freebie1)
-dev3.received_one(freebie2)
-dev2.received_one(freebie3)
 
-session.commit()
-print(freebie1.print_details())
+# Test Company relationship
+print("\nTesting Company relationships:")
+print(f"Amazon freebies: {[f.item_name for f in company1.freebies]}")
+print(f"Amazon devs: {[d.name for d in company1.devs]}")
+
+
+# Dev relationships
+print("\nTesting Dev relationships:")
+print(f"Leila freebies: {[f.item_name for f in dev1.freebies]}")
+print(f"Leila companies: {[c.name for c in dev1.companies]}")
 
 
 # freebies received by devs
@@ -56,24 +63,25 @@ print(dev3.received_one("Note Book"))
 
 
 # transfer ownership of freebie
+print("\nTesting give_away:")
 dev1.give_away(dev2, freebie1)
 session.commit()
+print(freebie1.print_details())     # print details after transfer
 
-# print details after transfer
-print(freebie1.print_details())
 
 # find oldest comapny
+print("\nOldest company:")
 print(Company.oldest_company(session).name)
 
 # print all companies
-print("Companies:")
+print("\nCompanies:")
 for company in session.query(Company).all():
     print(f"- {company.name} (Founded: {company.founding_year})")
 
  
  # print all freebies
 print("Freebies:")
-for commpany in session.query(Freebie).all():
+for freebie in session.query(Freebie).all():
     print(f"- {freebie.print_details()}")  
 
 session.close() 

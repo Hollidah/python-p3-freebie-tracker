@@ -1,3 +1,5 @@
+print("Loading models.py from:", __file__)
+
 from sqlalchemy import ForeignKey, Column, Integer, String, MetaData
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,14 +21,16 @@ class Company(Base):
     founding_year = Column(Integer())
 
 
-    # Relationship between freebies and comapny
+    # Relationship between freebies and comapany
     freebies = relationship('Freebie', back_populates='company')
-    devs = relationship('Dev', secondary='freebies', back_populates='companies')    # many-to-many relationship;company is linked to devs through the freebies table
+    devs = relationship('Dev', secondary='freebies', back_populates='companies', overlaps='freebies' )    # many-to-many relationship;company is linked to devs through the freebies table
 
 
     # Giving freebies to Devs
     def give_freebie(self, dev, item_name, value):
         freebie = Freebie(item_name=item_name, value=value, dev=dev, company=self)
+        session.add (freebie)
+        return freebie
 
 
     # Finding the oldest company
@@ -43,9 +47,9 @@ class Dev(Base):
     id = Column(Integer(), primary_key=True)
     name= Column(String(), nullable=False)
 
-    # Many-to-many relationships between Devs and Companies through freebies
+    # Many-to-many relationships between Devs and Companies 
     freebies = relationship('Freebie', back_populates='dev')
-    companies = relationship('Company', secondary='freebies', back_populates='devs')
+    companies = relationship('Company', secondary='freebies', back_populates='devs', overlaps='freebies')
 
 
     # Check if Dev received a specific freebie
@@ -78,15 +82,17 @@ class Freebie(Base):
     dev_id = Column(Integer, ForeignKey('devs.id'))
 
     # Relationship between the companies and devs
-    company = relationship('Company', back_populates='freebies')
-    dev = relationship('Dev', back_populates='freebies')
+    company = relationship('Company', back_populates='freebies', overlaps='companies,devs')
+    dev = relationship('Dev', back_populates='freebies', overlaps='companies,devs')
 
+
+    # check if freebie belongs to a specific dev
     def belongs_to(self, dev):
         return self.dev == dev
 
     def print_details(self):
         return f"{self.dev.name} owns a {self.item_name} from {self.company.name}"
-        
+
 
 
 
